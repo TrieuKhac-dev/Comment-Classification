@@ -1,0 +1,89 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Python files
+*.py text eol=lf
+*.pyx text eol=lf
+*.pyi text eol=lf
+
+# Config files
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.rst text eol=lf
+*.txt text eol=lf
+LICENSE text eol=lf
+README text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Batch scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Jupyter Notebooks
+*.ipynb text eol=lf linguist-documentation
+
+# Binary files
+*.pkl binary
+*.joblib binary
+*.pickle binary
+*.bin binary
+*.pt binary
+*.pth binary
+*.h5 binary
+*.keras binary
+*.onnx binary
+*.pb binary
+
+# Model files
+*.vec binary
+*.ftz binary
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.bz2 binary
+*.7z binary
+*.rar binary
+
+# Excel/CSV files
+*.xlsx binary
+*.xls binary
+*.csv text eol=lf
+
+# Git configuration
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+# Python related files diff settings
+*.py diff=python
+*.pyx diff=python
+
+# Export ignore (files not included when using git archive)
+.gitattributes export-ignore
+.gitignore export-ignore
+.github export-ignore
+test/ export-ignore
+docs/ export-ignore
+examples/ export-ignore
+.pytest_cache/ export-ignore
+.vscode/ export-ignore

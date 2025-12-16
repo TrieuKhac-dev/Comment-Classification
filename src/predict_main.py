@@ -3,7 +3,6 @@ from src.app_setup import container
 from src.pipelines.pipeline_config.lightgbm_pipeline_config import LightGBMPipelineConfig
 from src.models.classifier.base_classifier_context import BaseClassifierContextBuilder
 from config.core.paths import paths
-from src.utils.context.context_builder_helper import build_extractor_service, build_preprocessor_service
 from src.utils.model_utils import get_latest_model_path
 
 def predict_comments(comments):
@@ -14,10 +13,8 @@ def predict_comments(comments):
     # Lấy các service đã đăng ký từ container
     logger_service = container.resolve("logger_service")
     repository = container.resolve("repository")
-    
-    # Xây dựng extractor và preprocessor service từ utility
-    extractor_service = build_extractor_service()
-    preprocessor_service = build_preprocessor_service()
+    extractor_service = container.resolve("extractor_service")
+    preprocessor_service = container.resolve("preprocessor_service")
 
     # Xây dựng context cho pipeline predict
     context = (
@@ -66,6 +63,8 @@ if __name__ == "__main__":
         "ngon bổ rẻ",
         "hàng xịn, ngon bổ rẻ",
         "ngon bổ rẻ, hàng xịn",
-        "bạn đẹp quá"
+        "Sản phẩm rất tốt, tôi rất hài lòng!",
+        "Đồ rác, lừa đảo, đừng mua!",
+        "Giao hàng nhanh, đóng gói cẩn thận"
     ]
     predict_comments(comments)

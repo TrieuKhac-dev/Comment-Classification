@@ -8,7 +8,6 @@ from src.app_setup import container
 from src.pipelines.pipeline_config.lightgbm_pipeline_config import LightGBMPipelineConfig
 from src.models.classifier.base_classifier_context import BaseClassifierContextBuilder
 from config.core.paths import paths
-from src.utils.context.context_builder_helper import build_extractor_service, build_preprocessor_service
 from src.utils.model_utils import get_latest_model_path
 
 
@@ -33,10 +32,8 @@ async def lifespan(app: FastAPI):
     logger_service = container.resolve("logger_service")
     feature_cache_service = container.resolve("feature_cache_service")
     repository = container.resolve("repository")
-    
-    # Xây dựng extractor và preprocessor service
-    extractor_service = build_extractor_service()
-    preprocessor_service = build_preprocessor_service()
+    extractor_service = container.resolve("extractor_service")
+    preprocessor_service = container.resolve("preprocessor_service")
     
     # Tìm model mới nhất
     model_path = get_latest_model_path(paths.LIGHTGBM_DIR, "lightgbm", ".joblib")

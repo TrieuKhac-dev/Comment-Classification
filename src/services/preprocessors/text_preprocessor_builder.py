@@ -9,7 +9,8 @@ from src.services.preprocessors.preprocessing_steps import (
     RemoveEmojiStep,
     RemoveSpecialCharsStep,
     KeepVietnameseCharsStep,
-    NormalizeWhitespaceStep
+    NormalizeWhitespaceStep,
+    RemoveNonVietnameseStep
 )
 
 class TextPreprocessorBuilder:
@@ -65,6 +66,11 @@ class TextPreprocessorBuilder:
     def with_vietnamese_chars(self, enabled: bool = True, pattern: str = None):
         if enabled and pattern:
             return self._add_step(KeepVietnameseCharsStep(pattern), "keep_vietnamese_chars", True)
+        return self
+    
+    def with_remove_non_Vietnamese_chars(self, enabled: bool = True):
+        if enabled:
+            return self._add_step(RemoveNonVietnameseStep(), "remove_non_Vietnamese_chars", True)
         return self
     
     def build(self, config: dict = None) -> TextPreprocessorService:

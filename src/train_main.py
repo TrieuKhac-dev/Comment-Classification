@@ -5,7 +5,6 @@ from src.models.classifier.base_classifier_context import BaseClassifierContextB
 from config.core.paths import paths
 from config.training.data import data_config
 from config.model.classifier import classifier_config
-from src.utils.context.context_builder_helper import build_extractor_service, build_preprocessor_service
 
 def main():
     # Tạo timestamp cho model và feature cache
@@ -22,10 +21,8 @@ def main():
     splitter_service = container.resolve("splitter_service")
     feature_cache_service = container.resolve("feature_cache_service")
     repository = container.resolve("repository")
-
-    # Xây dựng extractor và preprocessor service từ utility
-    extractor_service = build_extractor_service()
-    preprocessor_service = build_preprocessor_service()
+    extractor_service = container.resolve("extractor_service")
+    preprocessor_service = container.resolve("preprocessor_service")
 
     # Xây dựng context
     context = (

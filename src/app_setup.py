@@ -99,17 +99,45 @@ def register_all(container: Container):
             lambda k=key: container.resolve(f"{k}_extractor")
         )
 
-    #  Đăng ký Composite Extractor Builder và Preprocessor Builder
-    
+
+    # Đăng ký Composite Extractor Builder và Preprocessor Builder
     container.register(
         "composite_extractor_builder",
         lambda: CompositeExtractorBuilder(container)
     )
-
     container.register(
         "preprocessor_builder",
         lambda: TextPreprocessorBuilder()
     )
+
+    # Đăng ký extractor_service (dùng composite extractor)
+    from src.services.extractors.extractor_service import ExtractorService
+    from config.core.settings import settings as _settings
+    def _extractor_service():
+        composite_extractor = (
+            container.resolve("composite_extractor_builder")
+            .add_extractor('sbert', weight=1.0)
+            .add_extractor('fasttext', weight=1.0)
+            .set_combine_mode('concat')
+            .build()
+        )
+        cache_service = container.resolve("feature_cache_service")
+        return ExtractorService(composite_extractor, cache_service)
+    container.register("extractor_service", _extractor_service)
+
+    # Đăng ký preprocessor_service (add step trực tiếp, không dùng config ngoài)
+    def _preprocessor_service():
+        return (
+            container.resolve("preprocessor_builder")
+            .with_unicode_normalize(enabled=True, form="NFC")
+            .with_lowercase(enabled=True)
+            .with_emoji_removal(enabled=True)
+            .with_special_chars_removal(enabled=True)
+            .with_whitespace_normalization(enabled=True)
+            .with_remove_non_Vietnamese_chars(enabled=True)
+            .build()
+        )
+    container.register("preprocessor_service", _preprocessor_service)
 
 # Khởi tạo container và đăng ký tất cả
 container = Container()

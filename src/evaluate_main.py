@@ -26,7 +26,6 @@ from src.pipelines.pipeline_config.lightgbm_pipeline_config import LightGBMPipel
 from src.models.classifier.base_classifier_context import BaseClassifierContextBuilder, BaseClassifierContext
 from config.core.paths import paths
 from config.training.data import data_config
-from src.utils.context.context_builder_helper import build_extractor_service, build_preprocessor_service
 from src.utils.model_utils import get_latest_model_path
 
 
@@ -64,10 +63,8 @@ def evaluate_with_raw_data(
     data_loader_service = container.resolve("data_loader_service")
     feature_cache_service = container.resolve("feature_cache_service")
     repository = container.resolve("repository")
-    
-    # Xây dựng extractor và preprocessor service
-    extractor_service = build_extractor_service()
-    preprocessor_service = build_preprocessor_service()
+    extractor_service = container.resolve("extractor_service")
+    preprocessor_service = container.resolve("preprocessor_service")
     
     # Xây dựng context
     builder = (
@@ -150,7 +147,7 @@ def evaluate_with_processed_data(
     repository = container.resolve("repository")
     
     # Xây dựng extractor service
-    extractor_service = build_extractor_service()
+    extractor_service = container.resolve("extractor_service")
     
     # Xây dựng context
     builder = (

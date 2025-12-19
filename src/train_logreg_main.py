@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from src.app_setup import container
-from src.pipelines.pipeline_config.lightgbm_pipeline_config import LightGBMPipelineConfig
+from src.pipelines.pipeline_config.logreg_pipeline_config import LogRegPipelineConfig
 from src.models.classifier.base_classifier_context import BaseClassifierContextBuilder
 from config.core.paths import paths
 from config.training.data import data_config
@@ -42,8 +42,8 @@ def main():
         .build()
     )
 
-    # Tạo pipeline train (tái sử dụng cấu hình LightGBM vì các bước chung)
-    pipeline = LightGBMPipelineConfig.train_pipeline(
+    # Tạo pipeline train cho Logistic Regression (dùng các pipeline step chung)
+    pipeline = LogRegPipelineConfig.train_pipeline(
         filepath="data/raw/train_1.csv",
         text_column=data_config.TEXT_COLUMN,
         label_columns=data_config.LABEL_COLUMNS,

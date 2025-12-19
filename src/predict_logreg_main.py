@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.app_setup import container
-from src.pipelines.pipeline_config.lightgbm_pipeline_config import LightGBMPipelineConfig
+from src.pipelines.pipeline_config.logreg_pipeline_config import LogRegPipelineConfig
 from src.models.classifier.base_classifier_context import BaseClassifierContextBuilder
 from config.core.paths import paths
 from src.utils.model_utils import get_latest_model_path
@@ -37,8 +37,8 @@ def predict_comments(comments):
 
     print(f"Using model: {model_path}")
 
-    # Tạo pipeline predict
-    predict_pipeline = LightGBMPipelineConfig.predict_pipeline(
+    # Tạo pipeline predict cho Logistic Regression
+    predict_pipeline = LogRegPipelineConfig.predict_pipeline(
         model_path=model_path,
         return_proba=True,
         load_type="joblib",

@@ -25,6 +25,7 @@ from src.services.extractors.composite_extractor_builder import CompositeExtract
 from src.services.preprocessors.text_preprocessor_builder import TextPreprocessorBuilder
 from src.services.data import DataLoaderService, DataSplitterService
 from src.classifiers.lightgbm_classifier import LightGBMClassifier
+from src.classifiers.logistic_regression_classifier import LogisticRegressionClassifier
 
 def register_all(container: Container):
     # Đăng ký các Factory và Provider
@@ -69,6 +70,7 @@ def register_all(container: Container):
     splitter_service = DataSplitterService()
     repository = ClassifierRepository()
     lightgbm_classifier = LightGBMClassifier()
+    logistic_regression_classifier = LogisticRegressionClassifier()
 
     # Đăng ký các Service vào DI Container
     container.register("model_cache_service", lambda: model_cache_service)
@@ -78,6 +80,7 @@ def register_all(container: Container):
     container.register("splitter_service", lambda: splitter_service)
     container.register("repository", lambda: repository)
     container.register("lightgbm_classifier", lambda: lightgbm_classifier)
+    container.register("logreg_classifier", lambda: logistic_regression_classifier)
 
     # Đăng ký Extractor vào DI Container
     for key in ["fasttext", "sbert"]:

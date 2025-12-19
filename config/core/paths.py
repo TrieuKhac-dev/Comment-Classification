@@ -21,6 +21,7 @@ class PathConfig:
     FASTTEXT_DIR = PRETRAINED_DIR / "fasttext"
     SBERT_DIR = PRETRAINED_DIR / "sbert"
     LIGHTGBM_DIR = TRAINED_DIR / "lightgbm"
+    LOGREG_DIR = TRAINED_DIR / "logreg"
 
     FEATURES_CACHE_DIR = TEMP_DIR / "feature_cache"
     MODEL_DOWNLOAD_TEMP_DIR = TEMP_DIR / "model_downloads"
@@ -41,6 +42,7 @@ class PathConfig:
             self.FASTTEXT_DIR,
             self.SBERT_DIR,
             self.LIGHTGBM_DIR,
+            self.LOGREG_DIR,
             self.FEATURES_CACHE_DIR,
             self.MODEL_DOWNLOAD_TEMP_DIR,
         ]

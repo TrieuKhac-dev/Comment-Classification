@@ -28,5 +28,15 @@ class ClassifierModelConfig:
 
     DEFAULT_SAVE_FORMAT = "pipeline"
 
+    # Tham số mặc định cho Logistic Regression
+    LOGREG_PARAMS = {
+        "C": 1.0,              # Hệ số regularization
+        "penalty": "l2",       # Penalty mặc định
+        "max_iter": 1000,      # Tăng số vòng lặp để hội tụ ổn định
+        "solver": "lbfgs",     # Solver hỗ trợ multinomial + l2
+        "n_jobs": -1,          # Dùng tất cả CPU
+        "verbose": 0,
+    }
+
 
 classifier_config = ClassifierModelConfig()

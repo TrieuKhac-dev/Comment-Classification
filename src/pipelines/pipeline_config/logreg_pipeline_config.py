@@ -192,4 +192,48 @@ class LogRegPipelineConfig:
         ]
         return Pipeline(steps)
 
+    @staticmethod
+    def train_pipeline_with_processed(
+        processed_file: str,
+        text_column: str,
+        label_columns: list[str],
+        train_config: Optional[dict] = None,
+        save_type: str = "joblib",
+        eval_metrics: list[str] = None,
+        eval_average: str = "weighted",
+        cache_features: bool = True,
+    ) -> Pipeline:
+        """
+        Tạo pipeline để train Logistic Regression từ processed data file (CSV UTF-8).
+        Bỏ qua LoadDataStep + PreprocessTextStep, dùng trực tiếp processed texts.
+
+        Toàn bộ dữ liệu trong file được dùng làm tập train; EvaluateStep sẽ
+        evaluate trên cùng tập này (dựa trên X_pred_features & y_pred).
+        """
+        steps = [
+            LoadProcessedDataStep(cache_file=processed_file),
+            ExtractFeatureStep(
+                use_cache=cache_features,
+                extract_train=False,
+                extract_test=False,
+                extract_val=False,
+                extract_pred=True,
+            ),
+            CopyDataStep(
+                from_X="X_pred_features",
+                to_X="X_train_features",
+                from_y="y_pred",
+                to_y="y_train",
+            ),
+            TrainStep(config=train_config),
+            SaveClassifierStep(
+                save_type=save_type,
+            ),
+            EvaluateStep(
+                metrics=eval_metrics or ["accuracy", "f1", "precision", "recall"],
+                average=eval_average,
+            ),
+        ]
+        return Pipeline(steps)
+
 

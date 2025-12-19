@@ -28,18 +28,30 @@ from config.model.classifier import classifier_config
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Train Logistic Regression model with configurable train data file (raw or processed)"
+        description="Train Logistic Regression model with raw data or processed data (mutually exclusive)"
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument(
         "--data",
         type=str,
-        help="Path to training data file (raw Excel/CSV or processed CSV). "
-             "Default: data/raw/train_1.csv",
+        help="Path to RAW training data file (Excel/CSV). Default: data/raw/train_1.csv",
+    )
+    group.add_argument(
+        "--processed",
+        type=str,
+        help="Path to PROCESSED training data file (CSV UTF-8, created by SaveProcessedDataStep).",
     )
     args = parser.parse_args()
 
-    # Chọn file train
-    train_file = args.data or "data/raw/train_1.csv"
+    # Chọn chế độ train
+    use_processed = args.processed is not None
+
+    # Đường dẫn file train
+    if use_processed:
+        train_file = args.processed
+    else:
+        train_file = args.data or "data/raw/train_1.csv"
+
     if not Path(train_file).exists():
         raise FileNotFoundError(f"Training data file not found: {train_file}")
 
@@ -60,7 +72,10 @@ def main():
     extractor_service = container.resolve("extractor_service")
     preprocessor_service = container.resolve("preprocessor_service")
 
-    logger_service.info(f"[Train LogReg] Using training data file: {train_file}")
+    if use_processed:
+        logger_service.info(f"[Train LogReg] Using PROCESSED training data file: {train_file}")
+    else:
+        logger_service.info(f"[Train LogReg] Using RAW training data file: {train_file}")
 
     # Xây dựng context
     context = (
@@ -79,20 +94,32 @@ def main():
     )
 
     # Tạo pipeline train cho Logistic Regression (dùng các pipeline step chung)
-    pipeline = LogRegPipelineConfig.train_pipeline(
-        filepath=train_file,
-        text_column=data_config.TEXT_COLUMN,
-        label_columns=data_config.LABEL_COLUMNS,
-        test_ratio=data_config.TEST_RATIO,
-        val_ratio=data_config.VAL_RATIO,
-        train_config=classifier_config.LOGREG_PARAMS,
-        save_type="joblib",
-        eval_metrics=["accuracy", "f1", "precision", "recall"],
-        eval_average="weighted",
-        cache_features=True,
-        save_processed=True,
-        processed_prefix=processed_prefix,
-    )
+    if use_processed:
+        pipeline = LogRegPipelineConfig.train_pipeline_with_processed(
+            processed_file=train_file,
+            text_column=data_config.TEXT_COLUMN,
+            label_columns=data_config.LABEL_COLUMNS,
+            train_config=classifier_config.LOGREG_PARAMS,
+            save_type="joblib",
+            eval_metrics=["accuracy", "f1", "precision", "recall"],
+            eval_average="weighted",
+            cache_features=True,
+        )
+    else:
+        pipeline = LogRegPipelineConfig.train_pipeline(
+            filepath=train_file,
+            text_column=data_config.TEXT_COLUMN,
+            label_columns=data_config.LABEL_COLUMNS,
+            test_ratio=data_config.TEST_RATIO,
+            val_ratio=data_config.VAL_RATIO,
+            train_config=classifier_config.LOGREG_PARAMS,
+            save_type="joblib",
+            eval_metrics=["accuracy", "f1", "precision", "recall"],
+            eval_average="weighted",
+            cache_features=True,
+            save_processed=True,
+            processed_prefix=processed_prefix,
+        )
 
     # Chạy pipeline
     pipeline.run(context)

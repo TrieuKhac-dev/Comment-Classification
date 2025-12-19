@@ -16,7 +16,11 @@ class LightGBMClassifier(IClassifier):
 
         config = config or {}
         self.model = lgb.LGBMClassifier(**config)
-        self.model.fit(X, y.ravel(), sample_weight=sample_weight)
+
+        # Đảm bảo y là numpy array 1D (kể cả khi input là DataFrame/Series)
+        y_array = np.asarray(y).ravel()
+
+        self.model.fit(X, y_array, sample_weight=sample_weight)
 
     def predict(
         self,

@@ -59,8 +59,10 @@ class LoadProcessedDataStep(IPipelineStep):
                     f"Cột có trong file: {df.columns.tolist()}"
                 )
             
-            # Lấy processed texts (cột text theo config)
-            processed_texts = df[text_column].tolist()
+            # Lấy processed texts (cột text theo config) và đảm bảo kiểu string
+            # Một số dòng có thể là NaN/float -> chuyển về chuỗi an toàn để tránh lỗi .split()
+            processed_series = df[text_column].fillna("").astype(str)
+            processed_texts = processed_series.tolist()
             
             # Lấy labels (các cột label theo config)
             labels_df = df[label_columns]

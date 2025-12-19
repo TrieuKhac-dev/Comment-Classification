@@ -1,4 +1,22 @@
+"""
+Entry point để train Logistic Regression model.
+
+Cho phép chọn file train (raw hoặc processed) qua terminal, tương tự evaluate_main.
+
+Ví dụ:
+    # Train với file raw mặc định
+    python -m src.train_logreg_main
+
+    # Train với file raw khác
+    python -m src.train_logreg_main --data data/raw/train.csv
+
+    # Train với file đã preprocess (ở data/processed)
+    python -m src.train_logreg_main --data data/processed/processed_logreg_YYYYMMDD_train_xxx.csv
+"""
+
+import argparse
 from datetime import datetime
+from pathlib import Path
 
 from src.app_setup import container
 from src.pipelines.pipeline_config.logreg_pipeline_config import LogRegPipelineConfig
@@ -9,6 +27,22 @@ from config.model.classifier import classifier_config
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Train Logistic Regression model with configurable train data file (raw or processed)"
+    )
+    parser.add_argument(
+        "--data",
+        type=str,
+        help="Path to training data file (raw Excel/CSV or processed CSV). "
+             "Default: data/raw/train_1.csv",
+    )
+    args = parser.parse_args()
+
+    # Chọn file train
+    train_file = args.data or "data/raw/train_1.csv"
+    if not Path(train_file).exists():
+        raise FileNotFoundError(f"Training data file not found: {train_file}")
+
     # Tạo timestamp cho model và feature cache
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_name = "logreg"
@@ -25,6 +59,8 @@ def main():
     repository = container.resolve("repository")
     extractor_service = container.resolve("extractor_service")
     preprocessor_service = container.resolve("preprocessor_service")
+
+    logger_service.info(f"[Train LogReg] Using training data file: {train_file}")
 
     # Xây dựng context
     context = (
@@ -44,7 +80,7 @@ def main():
 
     # Tạo pipeline train cho Logistic Regression (dùng các pipeline step chung)
     pipeline = LogRegPipelineConfig.train_pipeline(
-        filepath="data/raw/train_1.csv",
+        filepath=train_file,
         text_column=data_config.TEXT_COLUMN,
         label_columns=data_config.LABEL_COLUMNS,
         test_ratio=data_config.TEST_RATIO,
@@ -73,4 +109,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

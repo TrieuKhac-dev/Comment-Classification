@@ -1,4 +1,23 @@
+"""
+Entry point để train LightGBM model.
+
+Cho phép chọn file train (raw hoặc processed) qua terminal, tương tự evaluate_main.
+
+Ví dụ:
+    # Train với file raw mặc định
+    python -m src.train_lightgbm_main
+
+    # Train với file raw khác
+    python -m src.train_lightgbm_main --data data/raw/train.csv
+
+    # Train với file đã preprocess (ở data/processed)
+    python -m src.train_lightgbm_main --data data/processed/processed_lightgbm_YYYYMMDD_train_xxx.csv
+"""
+
+import argparse
 from datetime import datetime
+from pathlib import Path
+
 from src.app_setup import container
 from src.pipelines.pipeline_config.lightgbm_pipeline_config import LightGBMPipelineConfig
 from src.models.classifier.base_classifier_context import BaseClassifierContextBuilder
@@ -6,7 +25,24 @@ from config.core.paths import paths
 from config.training.data import data_config
 from config.model.classifier import classifier_config
 
+
 def main():
+    parser = argparse.ArgumentParser(
+        description="Train LightGBM model with configurable train data file (raw or processed)"
+    )
+    parser.add_argument(
+        "--data",
+        type=str,
+        help="Path to training data file (raw Excel/CSV or processed CSV). "
+             "Default: data/raw/train_1.csv",
+    )
+    args = parser.parse_args()
+
+    # Chọn file train
+    train_file = args.data or "data/raw/train_1.csv"
+    if not Path(train_file).exists():
+        raise FileNotFoundError(f"Training data file not found: {train_file}")
+
     # Tạo timestamp cho model và feature cache
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_name = "lightgbm"
@@ -14,7 +50,7 @@ def main():
     model_save_path = str(paths.LIGHTGBM_DIR / model_filename)
     feature_cache_prefix = f"{model_name}_{timestamp}"
     processed_prefix = f"{model_name}_{timestamp}"  # Prefix cho processed data cache
-    
+
     # Lấy các service đã đăng ký từ container
     logger_service = container.resolve("logger_service")
     data_loader_service = container.resolve("data_loader_service")
@@ -23,6 +59,8 @@ def main():
     repository = container.resolve("repository")
     extractor_service = container.resolve("extractor_service")
     preprocessor_service = container.resolve("preprocessor_service")
+
+    logger_service.info(f"[Train LightGBM] Using training data file: {train_file}")
 
     # Xây dựng context
     context = (
@@ -42,7 +80,7 @@ def main():
 
     # Tạo pipeline train cho LightGBM
     pipeline = LightGBMPipelineConfig.train_pipeline(
-        filepath="data/raw/train_1.csv",
+        filepath=train_file,
         text_column=data_config.TEXT_COLUMN,
         label_columns=data_config.LABEL_COLUMNS,
         test_ratio=data_config.TEST_RATIO,
@@ -52,8 +90,8 @@ def main():
         eval_metrics=["accuracy", "f1", "precision", "recall"],
         eval_average="weighted",
         cache_features=True,
-        save_processed=True,  # Lưu processed data
-        processed_prefix=processed_prefix
+        save_processed=True,  # Luôn lưu processed data
+        processed_prefix=processed_prefix,
     )
 
     # Chạy pipeline
@@ -64,11 +102,11 @@ def main():
     print(f"Feature cache prefix: {feature_cache_prefix}")
     print(f"Processed data cache prefix: {processed_prefix}")
 
-    # In kết quả đánh giá
     if hasattr(context, "metrics") and context.metrics and "evaluate" in context.metrics:
         print("\nKết quả đánh giá mô hình trên tập test:")
         for metric, value in context.metrics["evaluate"].items():
             print(f"{metric}: {value}")
+
 
 if __name__ == "__main__":
     main()

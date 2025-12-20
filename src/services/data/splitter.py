@@ -24,6 +24,12 @@ class DataSplitterService(IDataSplitterService):
         test_size: float,
         random_seed: int
     ) -> tuple[list[int], list[int]]:
+        # Nếu test_size == 0, không split, dùng toàn bộ làm train
+        if test_size == 0.0:
+            train_idx = list(range(len(texts)))
+            test_idx = []
+            return train_idx, test_idx
+        
         # Nếu chỉ có 1 cột nhãn (binary/classification), dùng StratifiedShuffleSplit
         if labels_array.shape[1] == 1:
             splitter = StratifiedShuffleSplit(

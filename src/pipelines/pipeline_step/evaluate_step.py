@@ -16,7 +16,8 @@ class EvaluateStep(IPipelineStep):
             context.metrics = {}
         
         # Trường hợp 1: Evaluate test set (có split)
-        if context.X_test_features is not None and context.y_test is not None:
+        if (context.X_test_features is not None and context.y_test is not None and 
+            len(context.X_test_features) > 0 and len(context.y_test) > 0):
             if context.logger_service:
                 context.logger_service.info("EvaluateStep | Evaluating on test set...")
             
@@ -32,7 +33,8 @@ class EvaluateStep(IPipelineStep):
                 context.logger_service.info(f"EvaluateStep | Test metrics: {eval_metrics}")
         
         # Trường hợp 2: Evaluate validation set (nếu có)
-        elif context.X_val_features is not None and context.y_val is not None:
+        elif (context.X_val_features is not None and context.y_val is not None and
+              len(context.X_val_features) > 0 and len(context.y_val) > 0):
             if context.logger_service:
                 context.logger_service.info("EvaluateStep | Evaluating on validation set...")
             
@@ -48,7 +50,8 @@ class EvaluateStep(IPipelineStep):
                 context.logger_service.info(f"EvaluateStep | Validation metrics: {eval_metrics}")
         
         # Trường hợp 3: Evaluate toàn bộ data (không split - dùng pred data)
-        elif context.X_pred_features is not None and context.y_pred is not None:
+        elif (context.X_pred_features is not None and context.y_pred is not None and
+              len(context.X_pred_features) > 0 and len(context.y_pred) > 0):
             if context.logger_service:
                 context.logger_service.info("EvaluateStep | Evaluating on full dataset...")
             
@@ -64,7 +67,9 @@ class EvaluateStep(IPipelineStep):
                 context.logger_service.info(f"EvaluateStep | Full dataset metrics: {eval_metrics}")
         
         else:
-            raise RuntimeError("No data available for evaluation. Need either test, validation, or prediction data with labels.")
+            if context.logger_service:
+                context.logger_service.warning("EvaluateStep | No data available for evaluation (test/val/pred empty or None). Skipping evaluation.")
+            # Không raise error, chỉ skip
 
         return context
     

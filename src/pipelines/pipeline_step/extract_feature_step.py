@@ -26,6 +26,11 @@ class ExtractFeatureStep(IPipelineStep):
         if texts is None:
             return
         
+        # Nếu texts empty, set empty array và skip extract
+        if not texts:
+            setattr(context, assign_attr, np.array([]))
+            return
+        
         # Lấy prefix từ context (nếu có)
         cache_prefix = getattr(context, 'feature_cache_prefix', None)
         

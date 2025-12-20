@@ -84,34 +84,38 @@ class SaveProcessedDataStep(IPipelineStep):
                         f"SaveProcessedDataStep | Saved train set ({len(context.X_train_processed)} samples)"
                     )
         
-        # Lưu test set
+        # Lưu test set (chỉ lưu nếu có samples)
         if self.save_test and hasattr(context, 'X_test_processed') and context.X_test_processed is not None:
-            if hasattr(context, 'texts') and context.texts is not None:
-                # Kiểm tra y_test
-                y_test = getattr(context, 'y_test', None)
-                if context.logger_service:
-                    context.logger_service.info(
-                        f"SaveProcessedDataStep | Test set - "
-                        f"X_test_processed: {len(context.X_test_processed)}, "
-                        f"y_test type: {type(y_test)}, "
-                        f"y_test shape: {y_test.shape if hasattr(y_test, 'shape') else 'N/A'}"
+            if len(context.X_test_processed) > 0:  # Chỉ lưu nếu test set không empty
+                if hasattr(context, 'texts') and context.texts is not None:
+                    # Kiểm tra y_test
+                    y_test = getattr(context, 'y_test', None)
+                    if context.logger_service:
+                        context.logger_service.info(
+                            f"SaveProcessedDataStep | Test set - "
+                            f"X_test_processed: {len(context.X_test_processed)}, "
+                            f"y_test type: {type(y_test)}, "
+                            f"y_test shape: {y_test.shape if hasattr(y_test, 'shape') else 'N/A'}"
+                        )
+                    
+                    key = self.cache_service.make_cache_key(context.texts)
+                    self.cache_service.save(
+                        processed_texts=context.X_test_processed,
+                        labels_df=y_test,
+                        key=key,
+                        prefix=self.prefix,
+                        dataset_type='test',
+                        text_column=self.text_column,
+                        label_columns=self.label_columns
                     )
-                
-                key = self.cache_service.make_cache_key(context.texts)
-                self.cache_service.save(
-                    processed_texts=context.X_test_processed,
-                    labels_df=y_test,
-                    key=key,
-                    prefix=self.prefix,
-                    dataset_type='test',
-                    text_column=self.text_column,
-                    label_columns=self.label_columns
-                )
-                saved_count += 1
+                    saved_count += 1
+                    if context.logger_service:
+                        context.logger_service.info(
+                            f"SaveProcessedDataStep | Saved test set ({len(context.X_test_processed)} samples)"
+                        )
+            else:
                 if context.logger_service:
-                    context.logger_service.info(
-                        f"SaveProcessedDataStep | Saved test set ({len(context.X_test_processed)} samples)"
-                    )
+                    context.logger_service.info("SaveProcessedDataStep | Test set empty, skipping save")
         
         # Lưu validation set
         if self.save_val and hasattr(context, 'X_val_processed') and context.X_val_processed is not None:

@@ -12,7 +12,8 @@ Ví dụ:
 
     # Train với file đã preprocess (ở data/processed)
     python -m src.train_lightgbm_main --data data/processed/processed_lightgbm_YYYYMMDD_train_xxx.csv
-"""
+    # Train không split (dùng toàn bộ data làm train, không evaluate)
+    python -m src.train_lightgbm_main --data data/raw/train.csv --no-split"""
 
 import argparse
 from datetime import datetime
@@ -41,6 +42,11 @@ def main():
         type=str,
         help="Path to PROCESSED training data file (CSV UTF-8, created by SaveProcessedDataStep).",
     )
+    parser.add_argument(
+        "--no-split",
+        action="store_true",
+        help="Do not split data into train/test, use all data as training set (no evaluation on test set).",
+    )
     args = parser.parse_args()
 
     # Chọn chế độ train
@@ -50,7 +56,7 @@ def main():
     if use_processed:
         train_file = args.processed
     else:
-        train_file = args.data or "data/raw/train_1.csv"
+        train_file = args.data or "data/raw/train_full.csv"
 
     if not Path(train_file).exists():
         raise FileNotFoundError(f"Training data file not found: {train_file}")
@@ -93,6 +99,10 @@ def main():
         .build()
     )
 
+    # Xác định test_ratio và val_ratio dựa trên --no-split
+    test_ratio = 0.0 if args.no_split else data_config.TEST_RATIO
+    val_ratio = 0.0 if args.no_split else data_config.VAL_RATIO
+
     # Tạo pipeline train cho LightGBM
     if use_processed:
         # Train từ processed data (bỏ qua LoadDataStep + PreprocessTextStep)
@@ -100,6 +110,8 @@ def main():
             processed_file=train_file,
             text_column=data_config.TEXT_COLUMN,
             label_columns=data_config.LABEL_COLUMNS,
+            test_ratio=test_ratio,
+            val_ratio=val_ratio,
             train_config=classifier_config.LIGHTGBM_PARAMS_BASE,
             save_type="joblib",
             eval_metrics=["accuracy", "f1", "precision", "recall"],
@@ -112,8 +124,8 @@ def main():
             filepath=train_file,
             text_column=data_config.TEXT_COLUMN,
             label_columns=data_config.LABEL_COLUMNS,
-            test_ratio=data_config.TEST_RATIO,
-            val_ratio=data_config.VAL_RATIO,
+            test_ratio=test_ratio,
+            val_ratio=val_ratio,
             train_config=classifier_config.LIGHTGBM_PARAMS_BASE,
             save_type="joblib",
             eval_metrics=["accuracy", "f1", "precision", "recall"],

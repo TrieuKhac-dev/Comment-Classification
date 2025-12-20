@@ -71,6 +71,11 @@ class LoadProcessedDataStep(IPipelineStep):
             context.X_pred_processed = processed_texts
             context.y_pred = labels_df
             
+            # Cũng set texts và labels_df để SplitDataStep có thể dùng (cho train pipeline)
+            # Processed texts cũng là texts, chỉ khác là đã preprocess rồi
+            context.texts = processed_texts
+            context.labels_df = labels_df
+            
             if context.logger_service:
                 context.logger_service.info(
                     f"LoadProcessedDataStep | Loaded {len(context.X_pred_processed)} "

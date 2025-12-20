@@ -197,6 +197,8 @@ class LogRegPipelineConfig:
         processed_file: str,
         text_column: str,
         label_columns: list[str],
+        test_ratio: float = 0.2,
+        val_ratio: float = 0.0,
         train_config: Optional[dict] = None,
         save_type: str = "joblib",
         eval_metrics: list[str] = None,
@@ -206,24 +208,46 @@ class LogRegPipelineConfig:
         """
         Tạo pipeline để train Logistic Regression từ processed data file (CSV UTF-8).
         Bỏ qua LoadDataStep + PreprocessTextStep, dùng trực tiếp processed texts.
-
-        Toàn bộ dữ liệu trong file được dùng làm tập train; EvaluateStep sẽ
-        evaluate trên cùng tập này (dựa trên X_pred_features & y_pred).
+        
+        Pipeline sẽ split dữ liệu thành train/test/val như train_pipeline thông thường.
         """
         steps = [
+            # Load processed data trực tiếp từ cache (đã qua preprocessing)
             LoadProcessedDataStep(cache_file=processed_file),
-            ExtractFeatureStep(
-                use_cache=cache_features,
-                extract_train=False,
-                extract_test=False,
-                extract_val=False,
-                extract_pred=True,
+            # Split data thành train/test/val (texts và labels_df đã được set trong LoadProcessedDataStep)
+            SplitDataStep(
+                test_ratio=test_ratio,
+                val_ratio=val_ratio,
+            ),
+            # Copy processed texts từ split results sang processed attributes
+            # (vì texts đã là processed rồi, không cần preprocess lại)
+            CopyDataStep(
+                from_X="X_train_texts",
+                to_X="X_train_processed",
             ),
             CopyDataStep(
-                from_X="X_pred_features",
-                to_X="X_train_features",
-                from_y="y_pred",
-                to_y="y_train",
+                from_X="X_test_texts",
+                to_X="X_test_processed",
+            ),
+        ]
+        
+        # Thêm copy val nếu có validation set
+        if val_ratio > 0:
+            steps.append(
+                CopyDataStep(
+                    from_X="X_val_texts",
+                    to_X="X_val_processed",
+                )
+            )
+        
+        # Tiếp tục với extract features, train, save, evaluate
+        steps.extend([
+            ExtractFeatureStep(
+                use_cache=cache_features,
+                extract_train=True,
+                extract_test=True,
+                extract_val=(val_ratio > 0),
+                extract_pred=False,
             ),
             TrainStep(config=train_config),
             SaveClassifierStep(
@@ -233,7 +257,7 @@ class LogRegPipelineConfig:
                 metrics=eval_metrics or ["accuracy", "f1", "precision", "recall"],
                 average=eval_average,
             ),
-        ]
+        ])
         return Pipeline(steps)
 
 

@@ -48,12 +48,6 @@ source venv/bin/activate
 
 3. Cài đặt dependencies từ `requirements.txt`:
 
-```bash
-pip install -r requirements.txt
-```
-
----
-
 ## Hướng dẫn Sử dụng (chỉ các file `*__main__.py`, `api_server.py`, `api_examples/api_client_example.py`)
 
 1. Huấn luyện (CLI):
@@ -97,6 +91,12 @@ python api_examples/api_client_example.py
 ```
 
 Ghi chú: các script demo `predict_*_main.py` hiện in kết quả ra stdout. Nếu cần tích hợp programmatic, hãy sử dụng trực tiếp các pipeline trong `src/pipelines/` hoặc xem `api_examples/api_client_example.py` để gọi API.
+. Ví dụ client (api_examples)
+
+```bash
+# Ví dụ client mẫu gọi API
+python api_examples/api_client_example.py
+```
 
 ---
 

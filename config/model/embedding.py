@@ -7,7 +7,8 @@ class EmbeddingModelConfig:
     FASTTEXT_POOLING = "mean"
 
     # SBERT
-    SBERT_MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
+    # Use full repo id on Hugging Face (include namespace) to avoid 401/404 issues
+    SBERT_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     SBERT_DIMENSION = 384
     SBERT_BATCH_SIZE = 200
     SBERT_MAX_LENGTH = 512

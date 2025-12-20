@@ -52,7 +52,7 @@ def register_all(container: Container):
     
     model_paths = {
         "fasttext": settings.paths.FASTTEXT_DIR / settings.embedding.FASTTEXT_MODEL_NAME,
-        "sbert": settings.paths.SBERT_DIR / settings.embedding.SBERT_MODEL_NAME,
+        "sbert": settings.paths.SBERT_DIR / settings.embedding.SBERT_MODEL_NAME.split("/")[-1],
     }
 
     # Khởi tạo các service dùng chung

@@ -48,6 +48,19 @@ source venv/bin/activate
 
 3. Cài đặt dependencies từ `requirements.txt`:
 
+```bash
+pip install -r requirements.txt
+```
+
+## Tải embedding models (SBERT và FastText)
+
+Trước khi chạy training hoặc server, hãy tải các embedding model bằng hai lệnh sau (chạy lần lượt):
+
+```bash
+python -m src.utils.ml_downloaders.sbert_downloader
+python -m src.utils.ml_downloaders.fasttext_downloader
+```
+
 ## Hướng dẫn Sử dụng (chỉ các file `*__main__.py`, `api_server.py`, `api_examples/api_client_example.py`)
 
 1. Huấn luyện (CLI):

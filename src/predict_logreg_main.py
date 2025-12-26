@@ -6,6 +6,9 @@ from src.models.classifier.base_classifier_context import BaseClassifierContextB
 from config.core.paths import paths
 from src.utils.model_utils import get_latest_model_path
 
+# Ngưỡng để coi là vi phạm (sử dụng P(class_1) >= THRESHOLD)
+THRESHOLD = 0.75
+
 
 def predict_comments(comments):
     """
@@ -53,9 +56,11 @@ def predict_comments(comments):
     print("Kết quả dự đoán cho comment:", comments)
     print("Dự đoán:", y_pred.round(2))
     for c, l, prob in zip(comments, labels, y_pred):
+        is_violation = float(prob[1]) >= THRESHOLD
         print(f"Bình luận: {c}")
         print(f"  Xác suất: {prob}")
-        print(f"  Nhãn dự đoán: {l} ({'vi phạm' if l == 1 else 'không vi phạm'})")
+        print(f"  Nhãn dự đoán (argmax): {l}")
+        print(f"  Quyết định theo ngưỡng {THRESHOLD}: {'vi phạm' if is_violation else 'không vi phạm'}")
 
 
 if __name__ == "__main__":

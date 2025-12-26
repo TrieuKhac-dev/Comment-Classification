@@ -79,6 +79,7 @@ class LogRegPipelineConfig:
                     metrics=eval_metrics
                     or ["accuracy", "f1", "precision", "recall"],
                     average=eval_average,
+                    threshold=0.75,
                 ),
             ]
         )
@@ -155,6 +156,7 @@ class LogRegPipelineConfig:
                 metrics=eval_metrics
                 or ["accuracy", "f1", "precision", "recall"],
                 average=eval_average,
+                threshold=0.75,
             ),
         ]
         return Pipeline(steps)
@@ -184,11 +186,12 @@ class LogRegPipelineConfig:
                 model_path=model_path,
                 load_type=provider_type,
             ),
-            EvaluateStep(
-                metrics=eval_metrics
-                or ["accuracy", "f1", "precision", "recall"],
-                average=eval_average,
-            ),
+                EvaluateStep(
+                    metrics=eval_metrics
+                    or ["accuracy", "f1", "precision", "recall"],
+                    average=eval_average,
+                    threshold=0.75,
+                ),
         ]
         return Pipeline(steps)
 
@@ -256,6 +259,7 @@ class LogRegPipelineConfig:
             EvaluateStep(
                 metrics=eval_metrics or ["accuracy", "f1", "precision", "recall"],
                 average=eval_average,
+                threshold=0.75,
             ),
         ])
         return Pipeline(steps)

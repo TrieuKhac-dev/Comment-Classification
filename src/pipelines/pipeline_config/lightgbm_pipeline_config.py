@@ -71,7 +71,8 @@ class LightGBMPipelineConfig:
             # Thêm bước đánh giá ngay sau khi train và lưu model
             EvaluateStep(
                 metrics=eval_metrics or ["accuracy", "f1", "precision", "recall"],
-                average=eval_average
+                average=eval_average,
+                threshold=0.75,
             ),
         ])
         return Pipeline(steps)
@@ -160,7 +161,8 @@ class LightGBMPipelineConfig:
             ),
             EvaluateStep(
                 metrics=eval_metrics or ["accuracy", "f1", "precision", "recall"],
-                average=eval_average
+                average=eval_average,
+                threshold=0.75,
             ),
         ]
         return Pipeline(steps)
@@ -276,6 +278,7 @@ class LightGBMPipelineConfig:
             EvaluateStep(
                 metrics=eval_metrics or ["accuracy", "f1", "precision", "recall"],
                 average=eval_average,
+                threshold=0.75,
             ),
         ])
         return Pipeline(steps)

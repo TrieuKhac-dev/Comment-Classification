@@ -19,6 +19,9 @@ logger_service = None
 feature_cache_service = None
 repository = None
 
+# Ngưỡng để coi là vi phạm dựa trên xác suất của class 1
+THRESHOLD = 0.75
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -239,7 +242,8 @@ async def predict_comments_endpoint(request: CommentRequest):
         for comment_id, comment_text, label, prob in zip(
             comment_ids, comment_texts, labels, violation_probs
         ):
-            is_violation = bool(label == 1)
+            # Quyết định vi phạm dựa trên xác suất class 1 so với THRESHOLD
+            is_violation = float(prob) >= THRESHOLD
             
             results[comment_id] = PredictionResult(
                 is_violation=is_violation,
@@ -307,7 +311,7 @@ async def predict_simple(comments: List[str]):
         for comment, label, prob in zip(comments, labels, violation_probs):
             predictions.append({
                 "comment": comment,
-                "is_violation": bool(label == 1),
+                "is_violation": float(prob) >= THRESHOLD,
                 "violation_probability": float(prob)
             })
         
